@@ -1,0 +1,42 @@
+{% from "_macros.html" import dial as render_dial %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Entrar · Lapid.ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,500..800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+<div class="auth">
+  <section class="auth-art" aria-hidden="false">
+    <a class="brand" href="#"><span class="brand-dot"></span>lapid<span class="brand-ai">.ai</span></a>
+    <div>
+      <h1>Suporte técnico que não dorme.</h1>
+      <p>Relatos dos usuários e erros dos seus sites, reunidos num só lugar, a qualquer hora.</p>
+    </div>
+    {{ render_dial(art, false) }}
+  </section>
+  <form class="auth-form" method="post" autocomplete="on">
+    <h2>Entrar no painel</h2>
+    <p class="muted">Acesso restrito ao administrador.</p>
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in msgs %}<div class="flash flash-{{ cat }}" role="alert">{{ msg }}</div>{% endfor %}
+    {% endwith %}
+    {% if not configured %}
+      <div class="flash flash-error">Defina <code>ADMIN_EMAIL</code> e <code>ADMIN_PASSWORD_HASH</code> no arquivo <code>.env</code> para habilitar o acesso.</div>
+    {% endif %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="email">E-mail</label>
+    <input id="email" name="email" type="email" required autocomplete="username" autofocus>
+    <label for="password">Senha</label>
+    <input id="password" name="password" type="password" required autocomplete="current-password">
+    <button class="btn btn-primary" type="submit">Entrar</button>
+  </form>
+</div>
+</body>
+</html>

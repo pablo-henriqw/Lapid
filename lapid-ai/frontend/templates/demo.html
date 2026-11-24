@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Site de demonstração</title>
+  <style>
+    body{font-family:system-ui,sans-serif;max-width:640px;margin:15vh auto;padding:0 20px;line-height:1.6;color:#1b2230}
+    code{background:#eef1f6;padding:2px 6px;border-radius:4px}
+    button{font:inherit;padding:10px 16px;border-radius:8px;border:1px solid #c9d1e0;background:#fff;cursor:pointer;margin-right:8px}
+  </style>
+</head>
+<body>
+  <h1>Site de demonstração</h1>
+  <p>Esta página simula um site de cliente. Use o botão <strong>Suporte</strong> no canto inferior direito para enviar um relato.</p>
+  <p>Para testar o monitoramento, provoque um erro de JavaScript e veja-o em <strong>Erros</strong> no painel:</p>
+  <button type="button" id="boom">Provocar erro de JavaScript</button>
+  <button type="button" id="boom-async">Provocar erro assíncrono</button>
+  {% if site %}
+    <script src="{{ url_for('public.widget') }}" data-key="{{ site.api_key }}" defer></script>
+  {% else %}
+    <p><strong>Nenhum site conectado.</strong> Crie um em <a href="{{ url_for('admin.sites') }}">Sites</a> com o domínio <code>{{ request.host.split(':')[0] }}</code> e recarregue.</p>
+  {% endif %}
+  <script>
+    document.getElementById("boom").addEventListener("click", function () { window.naoExiste.chamar(); });
+    document.getElementById("boom-async").addEventListener("click", function () {
+      Promise.reject(new TypeError("Falha simulada ao carregar o carrinho " + Math.floor(Math.random() * 1000)));
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, source, pager %}
+{% block title %}Erros{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div>
+    <h1>Erros</h1>
+    <p class="lede">Erros iguais são agrupados. O número mostra quantas vezes cada um aconteceu.</p>
+  </div>
+  <span class="muted">{{ page.total }} {{ 'grupo' if page.total == 1 else 'grupos' }}</span>
+</header>
+
+<form class="filters" method="get">
+  <select name="status" aria-label="Situação">
+    <option value="all" {{ 'selected' if f.status not in statuses }}>Todas as situações</option>
+    {% for k, v in statuses.items() %}<option value="{{ k }}" {{ 'selected' if f.status == k }}>{{ v }}</option>{% endfor %}
+  </select>
+  <select name="source" aria-label="Origem">
+    <option value="">Todas as origens</option>
+    {% for k, v in sources.items() %}<option value="{{ k }}" {{ 'selected' if f.source == k }}>{{ v }}</option>{% endfor %}
+  </select>
+  <select name="site" aria-label="Site">
+    <option value="">Todos os sites</option>
+    {% for s in sites %}<option value="{{ s.id }}" {{ 'selected' if f.site == s.id }}>{{ s.name }}</option>{% endfor %}
+  </select>
+  <button class="btn btn-primary" type="submit">Filtrar</button>
+</form>
+
+{% if page.items %}
+<div class="table-wrap"><table>
+  <thead><tr><th>Erro</th><th>Origem</th><th>Site</th><th>Vezes</th><th>Última vez</th><th>Situação</th></tr></thead>
+  <tbody>
+  {% for g in page.items %}
+    <tr>
+      <td class="clip"><a href="{{ url_for('admin.error_detail', gid=g.id) }}">{{ g.message }}</a><br><span class="muted">{{ g.error_type }}</span></td>
+      <td>{{ source(g) }}</td>
+      <td class="muted">{{ g.site_name }}</td>
+      <td class="num">{{ g.count }}</td>
+      <td class="muted nowrap" title="{{ g.last_seen|localtime }}">{{ g.last_seen|ago }}</td>
+      <td><span class="chip chip-{{ g.status }}">{{ g.status_label }}</span></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{{ pager(page, 'admin.errors') }}
+{% else %}
+<p class="empty">{% if f.status == 'open' and not f.source and not f.site %}Nenhum erro em aberto. Quando o widget ou o servidor registrarem uma falha, ela aparece aqui.{% else %}Nenhum erro encontrado com esses filtros.{% endif %}</p>
+{% endif %}
+{% endblock %}

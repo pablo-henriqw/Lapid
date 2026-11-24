@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% from "_macros.html" import source %}
+{% block title %}Erro{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div><a class="back" href="{{ url_for('admin.errors') }}">Voltar para erros</a><h1>{{ g.error_type }}</h1></div>
+  <span class="chip chip-{{ g.status }}">{{ g.status_label }}</span>
+</header>
+
+<section class="grid-detail">
+  <div>
+    <p class="report">{{ g.message }}</p>
+    <dl class="meta">
+      <dt>Origem</dt><dd>{{ source(g) }} em {{ g.site_name }}</dd>
+      <dt>Ocorrências</dt><dd class="num">{{ g.count }}</dd>
+      <dt>Primeira vez</dt><dd>{{ g.first_seen|localtime('%d/%m/%Y %H:%M:%S') }}</dd>
+      <dt>Última vez</dt><dd>{{ g.last_seen|localtime('%d/%m/%Y %H:%M:%S') }} <span class="muted">({{ g.last_seen|ago }})</span></dd>
+      {% if g.last_page_url %}<dt>Última página</dt><dd>{{ g.last_page_url }}</dd>{% endif %}
+      {% if g.external_url %}<dt>No Sentry</dt><dd><a href="{{ g.external_url }}" target="_blank" rel="noopener noreferrer nofollow">Abrir issue</a></dd>{% endif %}
+    </dl>
+
+    {% if g.sample_stack %}
+    <h2 class="sub">Stack trace</h2>
+    <pre class="stack-trace"><code>{{ g.sample_stack }}</code></pre>
+    {% endif %}
+
+    <h2 class="sub sub-last">Últimas ocorrências</h2>
+    {% for e in events %}
+      <div class="occurrence"><span class="muted">{{ e.created_at|localtime('%d/%m %H:%M:%S') }}</span><span>{{ e.page_url or '—' }}</span></div>
+    {% else %}<p class="empty">Sem ocorrências detalhadas.</p>{% endfor %}
+  </div>
+
+  <div class="stack">
+    <div class="panel">
+      <h2>Situação</h2>
+      <form method="post" action="{{ url_for('admin.error_status', gid=g.id) }}" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <select name="status" aria-label="Nova situação">
+          {% for k, v in statuses.items() %}<option value="{{ k }}" {{ 'selected' if g.status == k }}>{{ v }}</option>{% endfor %}
+        </select>
+        <button class="btn btn-primary" type="submit">Salvar situação</button>
+      </form>
+      <p class="muted flush">Se um erro resolvido voltar a ocorrer, ele reabre sozinho.</p>
+    </div>
+    <div class="panel">
+      <h2>Histórico</h2>
+      <ol class="timeline">
+        {% for h in history %}
+          <li><span>{{ h.details or h.action }}</span><span class="muted">{{ h.created_at|localtime }} por {{ h.actor }}</span></li>
+        {% else %}<li class="muted">Sem registros.</li>{% endfor %}
+      </ol>
+    </div>
+  </div>
+</section>
+{% endblock %}

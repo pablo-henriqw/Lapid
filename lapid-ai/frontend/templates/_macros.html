@@ -1,0 +1,31 @@
+{% macro badge(c) %}<span class="chip chip-{{ c.status }}">{{ c.status_label }}</span>{% endmacro %}
+{% macro source(g) %}<span class="chip chip-src">{{ g.source_label }}</span>{% endmacro %}
+
+{% macro pager(page, endpoint) %}
+{% if page.pages > 1 %}
+<div class="pager">
+  {% set args = request.args.to_dict() %}
+  {% if page.has_prev %}<a class="btn btn-ghost btn-sm" href="{{ url_for(endpoint, **dict(args, page=page.prev_num)) }}">Anterior</a>{% endif %}
+  <span class="muted">Página {{ page.page }} de {{ page.pages }}</span>
+  {% if page.has_next %}<a class="btn btn-ghost btn-sm" href="{{ url_for(endpoint, **dict(args, page=page.next_num)) }}">Próxima</a>{% endif %}
+</div>
+{% endif %}
+{% endmacro %}
+
+{# Relógio de 24h: cada barra é uma hora do dia; o comprimento é o volume de relatos. #}
+{% macro dial(d, core=true) %}
+<svg class="dial" viewBox="0 0 320 320" role="img" aria-label="{% if d.peak_hour %}Relatos por hora do dia. Horário de pico: {{ d.peak_hour }}.{% else %}Relatos por hora do dia. Ainda sem dados.{% endif %}">
+  <circle class="dial-track" cx="160" cy="160" r="52"/>
+  <path class="dial-night" d="{{ d.night }}"/>
+  {% for l in d.labels %}<text class="dial-label" x="{{ l.x }}" y="{{ l.y }}">{{ l.t }}</text>{% endfor %}
+  {% for b in d.bars %}<line class="dial-bar{% if b.hot %} hot{% elif b.n == 0 %} zero{% endif %}" pathLength="1" x1="{{ b.x1 }}" y1="{{ b.y1 }}" x2="{{ b.x2 }}" y2="{{ b.y2 }}"><title>{{ b.label }}: {{ b.n }}</title></line>{% endfor %}
+  {% if core %}
+    {% if d.peak_hour %}
+      <text class="dial-core" x="160" y="160">{{ d.peak_hour }}</text>
+      <text class="dial-sub" x="160" y="180">horário de pico</text>
+    {% else %}
+      <text class="dial-sub" x="160" y="164">sem relatos ainda</text>
+    {% endif %}
+  {% endif %}
+</svg>
+{% endmacro %}

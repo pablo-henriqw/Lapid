@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, dial as render_dial %}
+{% block title %}Visão geral{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="dial-wrap">{{ render_dial(dial) }}</div>
+  <div class="hero-copy">
+    <h1>Quando os relatos chegam</h1>
+    <p class="lede">Cada barra é uma hora do dia nos últimos 14 dias. A faixa azul na base marca a madrugada, das 21h às 6h.</p>
+
+    <h2>Fila de triagem</h2>
+    <svg class="qbar" viewBox="0 0 100 3" preserveAspectRatio="none" role="img" aria-label="Distribuição das reclamações por situação">
+      {% for s in queue %}{% if s.w %}<rect class="q-{{ s.key }}" x="{{ s.x }}" y="0" width="{{ s.w }}" height="3"/>{% endif %}{% endfor %}
+    </svg>
+    <ul class="legend">
+      {% for s in queue %}
+      <li><a href="{{ url_for('admin.complaints', status=s.key) }}"><i class="i-{{ s.key }}"></i>{{ s.label }}<span class="num">{{ s.n }}</span></a></li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <h2>Erros em aberto {% if errors_open %}<span class="muted">({{ errors_open }})</span>{% endif %}</h2>
+    <a href="{{ url_for('admin.errors') }}">Ver todos</a>
+  </div>
+  {% if attention %}
+  <ul class="alert-list">
+    {% for g in attention %}
+    <li>
+      <a href="{{ url_for('admin.error_detail', gid=g.id) }}">{{ g.message }}</a>
+      <span class="meta-line">{{ g.source_label }} em {{ g.site_name }}, {{ g.last_seen|ago }}</span>
+      <span class="num" title="Ocorrências">{{ g.count }}×</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p class="empty">Nenhum erro em aberto. Os erros capturados pelo widget e pelo servidor aparecem aqui, agrupados por recorrência.</p>
+  {% endif %}
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <h2>Chegadas recentes</h2>
+    <a href="{{ url_for('admin.complaints') }}">Ver todas</a>
+  </div>
+  {% if recent %}
+  <ul class="feed">
+    {% for c in recent %}
+    <li>
+      <a class="proto" href="{{ url_for('admin.complaint_detail', cid=c.id) }}">{{ c.protocol }}</a>
+      <span class="text">{{ c.description }}<span class="site">{{ c.site.name }}</span></span>
+      {{ badge(c) }}
+      <span class="muted nowrap">{{ c.created_at|ago }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p class="empty">Nenhuma reclamação ainda. Conecte um site em <a href="{{ url_for('admin.sites') }}">Sites</a> e instale o widget para começar a receber relatos.</p>
+  {% endif %}
+</section>
+
+<section class="section">
+  <div class="section-head"><h2>Volume diário</h2><span class="muted">{{ stats.last14 }} relatos em 14 dias, {{ sites_active }} {{ 'site conectado' if sites_active == 1 else 'sites conectados' }}</span></div>
+  <svg class="pulse-strip" viewBox="0 0 392 120" role="img" aria-label="Reclamações por dia nos últimos 14 dias">
+    <line x1="0" y1="100.5" x2="392" y2="100.5" class="chart-base"/>
+    {% for b in bars %}
+      <rect x="{{ b.x }}" y="{{ b.y }}" width="20" height="{{ b.h }}" rx="4" class="chart-bar{% if b.n == 0 %} chart-empty{% endif %}"><title>{{ b.label }}: {{ b.n }}</title></rect>
+      <text x="{{ b.x + 10 }}" y="114" text-anchor="middle" class="chart-tick">{{ b.day }}</text>
+    {% endfor %}
+  </svg>
+</section>
+{% endblock %}

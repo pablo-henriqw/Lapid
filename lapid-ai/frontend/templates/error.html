@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Algo deu errado · Lapid.ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,500..800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+  <main class="err-page">
+    <div>
+      <h1>Algo deu errado do nosso lado.</h1>
+      <p class="muted">O erro foi registrado no monitoramento. Tente novamente em instantes.</p>
+      <a class="btn btn-ghost" href="{{ url_for('admin.overview') }}">Voltar ao painel</a>
+    </div>
+  </main>
+</body>
+</html>
